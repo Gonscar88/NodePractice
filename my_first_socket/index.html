@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Socket.IO chat</title>
+        <style>
+            .row {padding: 3px; position: fixed; bottom: 0; width: 100%; }
+            /* * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font: 13px Helvetica, Arial; }
+            form input { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
+            form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            #messages li { padding: 5px 10px; }
+            #messages li:nth-child(odd) { background: #eee; } */
+        </style>
+        <!-- Compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    </head>
+    <body>
+        <ul id="messages"></ul>
+
+        <div class="row">
+            <div class="col l6">
+                <form action="" id="user_name">
+                    <input type="text" id="user" autocomplete="off" placeholder="Your Nickname" required="required" value="Oscar">
+                    <button class="btn">Set Nickname</button>
+                </form>
+            </div>
+            <div class="col l6">
+                <form action="" id="messageForm">
+                    <input id="m" autocomplete="off" />
+                    <button class="btn">Send</button>
+                </form>
+            </div>
+        </div>
+        
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <!-- Compiled and minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script>
+            $(function(){
+                var socket = io();
+
+                $('#user_name').submit(function(e){
+                    e.preventDefault();
+                    var user_name = $('#user').val();
+                    socket.emit("user setNickname", user_name);
+                    return false
+                });
+
+                socket.on("user setNickname", function(user_name) {
+                    $('#messages').append($('<li>').html(`<b>${user_name}</b> has connected!!`));
+                });
+
+                $('#messageForm').submit(function(e){
+                    e.preventDefault() //Prevents page reloading
+                    var user_data = {
+                        'user': $('#user').val(),
+                        'msg': $('#m').val()
+                    }
+                    socket.emit('chat message', user_data);
+                    $('#m').val('');
+                    return false;
+                });
+                
+                socket.on('chat message', function(user_data){
+                    $('#messages').append($('<li>').html(`<b>${user_data.user} : </b> ${user_data.msg}`));
+                });
+
+                // socket.on('disconnect', () => {
+                //     var user = $('#user').val();
+                //     console.log("Desde frontend, usuario se ha desconectado", user);
+                //     if (user){
+                //         console.log("Existe un usario");
+                //         socket.emit('user dos', user);
+                //     }else{
+                //         console.log("NO Existe un usario")
+                //     }
+                //     // user.val("");
+                // });
+                
+                // socket.on("user desconect", (username) =>{
+                //     $('#messages').append($('<li>').html(`The user <b>${user_name}</b> has desconect`));
+                // })
+                
+            });
+        </script>
+    </body>
+</html>
